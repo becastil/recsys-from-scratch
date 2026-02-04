@@ -17,5 +17,10 @@ def train_popularity(clean_events_csv: Path) -> dict:
     # Keep only clicks (we only generate clicks today, but this is future-proof)
     df = df[df["event_type"] == "click"].copy()
 
-    
+    counts = (
+        df.groupby("item_id", as_index=False)
+        .size()
+        .rename(columns={"size": "clicks"})
+        .sort_values(["clicks", "item_id"], ascending=[False, True])
+    )
 
