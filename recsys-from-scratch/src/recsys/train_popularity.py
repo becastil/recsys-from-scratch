@@ -33,4 +33,19 @@ def train_popularity(clean_events_csv: Path) -> dict:
         "data_rows": int(len(df)),
     }
 
-def save_versioned_artifact(model: )
+def save_versioned_artifact(model: dict, artifacts_dir: Path = Path("artifacts/models")) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    out_dir = artifacts_dir / ts
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    model_path = out_dir / "model.json"
+    meta_path = out_dir / "metadata.json"
+
+    with model_path.open("w") as f:
+        json.dump(model, f, indent=2)
+         
+    # Convenience pointer to latest
+    latest_path = artifacts_dir / "LATEST"
+    latest_path.write_text(str(out_dir))
+
+
