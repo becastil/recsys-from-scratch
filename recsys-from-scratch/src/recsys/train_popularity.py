@@ -48,4 +48,7 @@ def save_versioned_artifact(model: dict, artifacts_dir: Path = Path("artifacts/m
     latest_path = artifacts_dir / "LATEST"
     latest_path.write_text(str(out_dir))
 
-
+    print(f"Saved model: {model_path}")
+    print(f"Saved metadata: {meta_path}")
+    print(f"Updated LATEST: {latest_path} -> {out_dir}")
+    return out_dir
