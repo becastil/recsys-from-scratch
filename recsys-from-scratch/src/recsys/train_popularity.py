@@ -43,7 +43,15 @@ def save_versioned_artifact(model: dict, artifacts_dir: Path = Path("artifacts/m
 
     with model_path.open("w") as f:
         json.dump(model, f, indent=2)
-         
+
+    metadata = {
+        "model_type": model.get("model_type"),
+        "trained_at_utc": model.get("trained_at_utc"),
+        "data_rows": model.get("data_rows")
+    }
+    with meta_path.open("w") as f:
+        json.dump(metadata, f, indent=2)
+
     # Convenience pointer to latest
     latest_path = artifacts_dir / "LATEST"
     latest_path.write_text(str(out_dir))
