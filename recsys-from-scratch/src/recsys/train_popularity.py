@@ -52,3 +52,16 @@ def save_versioned_artifact(model: dict, artifacts_dir: Path = Path("artifacts/m
     print(f"Saved metadata: {meta_path}")
     print(f"Updated LATEST: {latest_path} -> {out_dir}")
     return out_dir
+
+def main():
+    clean_csv = Path("data/clean/events.csv")
+    if not clean_csv.exists():
+        raise FileNotFoundError("Missing data/clean/events.csv. Run generate_events first.")
+    
+    model = train_popularity(clean_csv)
+    save_versioned_artifact(model)
+
+if __name__ == "__main__":
+    main()
+
+    
