@@ -1,18 +1,16 @@
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import List
 
 from fastapi import FastAPI, Query
 
 # This file is the WEB SERVER (API).
 # It loads the latest model and returns recommendations.
 
-app = FastAPI(title="Recsys MVP (Popularity)")
-
 ARTIFACTS_ROOT = Path("artifacts/models")
 MODEL = None
 
-def load_latest_model() -> dict: 
+def load_latest_model() -> dict:
     latest_ptr = ARTIFACTS_ROOT / "LATEST"
     if not latest_ptr.exists():
         raise FileNotFoundError("No model found. Train one first (python src/recsys/train_popularity.py).")
@@ -22,10 +20,13 @@ def load_latest_model() -> dict:
     with model_path.open() as f:
         return json.load(f)
 
-@app.on_event("startup")
-def _startup() -> None:
+@asynccontextmanager
+async def lifespan(app):
     global MODEL
-    MODEL = load_latest_model()    
+    MODEL = load_latest_model()
+    yield
+
+app = FastAPI(title="Recsys MVP (Popularity)", lifespan=lifespan)
 
 @app.get("/health")
 def health() -> dict:
@@ -36,7 +37,7 @@ def recommend(user_id: str = Query(...), k: int = Query(5, ge=1, le=50)) -> dict
     # Cold-start fallback for now = same popularity list for everyone.
     if MODEL is None:
         return {"user_id": user_id, "items": [], "reason": "model_not_loaded"}
-    
-    items: List[str] = MODEL["popular_items"][:k]
+
+    items: list[str] = MODEL["popular_items"][:k]
     return {"user_id": user_id, "items": items, "model_type": MODEL["model_type"]}
 
